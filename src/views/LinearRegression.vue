@@ -6,7 +6,7 @@
       dl.definition-card
         dt
           h4 Regression line equation (in ML-Style)
-        dd y = b + w*x
+        dd y = b + w · x
       dl.definition-card
         dt
           h4 Defninitions
@@ -18,10 +18,15 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import useHelloWorld from "@/compositions/helloWorld";
 
 export default defineComponent({
   name: "LinearRegression",
   components: {},
+  setup() {
+    const { myCFunctionString } = useHelloWorld("TEST PARAM");
+    return { myCFunctionString };
+  },
 });
 </script>
 

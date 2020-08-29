@@ -3,13 +3,11 @@
   h1 {{ msg }}
   h3 {{ getMyState }}
   h3 {{ value }}
-  h3 {{ helloWorldSetup.myCFunctionString.value }}
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
 import { mapGetters } from "vuex";
-import useHelloWorld from "../compositions/helloWorld";
 
 export default defineComponent({
   name: "HelloWorld",
@@ -19,11 +17,6 @@ export default defineComponent({
   computed: {
     ...mapGetters(["getMyState"]),
     ...mapGetters("myModule", ["value"]),
-  },
-  setup() {
-    const helloWorldSetup = useHelloWorld("TEST PARAM");
-
-    return { helloWorldSetup };
   },
 });
 </script>
