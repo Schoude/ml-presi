@@ -5,7 +5,7 @@
     router-link(to="/linreg") Linear Regression
     router-link(to="/logreg") Logistic Regression
     router-link(to="/cat") Categorization
-  router-view.content
+  router-view.view
 </template>
 
 <script lang="ts">
@@ -28,7 +28,6 @@ export default defineComponent({
   font-size: 18px
 
   a
-    font-weight: bold
     color: white
     margin-right: 20px
 
@@ -41,6 +40,6 @@ export default defineComponent({
     &.router-link-exact-active
       color: $color-tfjs
 
-.content
+.view
   padding: 0 24px
 </style>
