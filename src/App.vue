@@ -1,37 +1,46 @@
 <template lang="pug">
 #app
-  router-link(to="/") Home |
-  router-link(to="/about") About
-  router-view
-  h1 {{ count }}
+  #nav
+    router-link(to="/") Intro
+    router-link(to="/linreg") Linear Regression
+    router-link(to="/logreg") Logistic Regression
+    router-link(to="/cat") Categorization
+  router-view.content
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
+import { defineComponent } from "vue";
 export default defineComponent({
   name: "App",
-  setup() {
-    const count = ref(1);
-    return { count };
-  },
 });
 </script>
 
 <style lang="sass">
-#app
-  font-family: Avenir, Helvetica, Arial, sans-serif
-  -webkit-font-smoothing: antialiased
-  -moz-osx-font-smoothing: grayscale
-  text-align: center
-  color: #2c3e50
+@import './sass/_variables'
 
 #nav
-  padding: 30px
+  display: flex
+  height: 56px
+  padding: 0 16px
+  align-items: center
+  background-color: $color-nav-background
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2)
+  font-size: 18px
 
   a
     font-weight: bold
-    color: #2c3e50
+    color: white
+    margin-right: 20px
+
+    &:last-child
+      margin-right: 0
+
+    &:hover
+      color: lighten($color-tfjs, 15)
 
     &.router-link-exact-active
-      color: #42b983
+      color: $color-tfjs
+
+.content
+  padding: 0 24px
 </style>

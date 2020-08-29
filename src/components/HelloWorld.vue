@@ -9,7 +9,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { mapGetters } from "vuex";
-import useHelloWorld from "./compositions/helloWorld";
+import useHelloWorld from "../compositions/helloWorld";
 
 export default defineComponent({
   name: "HelloWorld",

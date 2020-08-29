@@ -1,0 +1,22 @@
+@import './_variables'
+@import './_mixins'
+
+html,
+body
+  margin: 0
+  padding: 0
+  background-color: $color-page-background
+  font-family: $font-main
+  -webkit-font-smoothing: antialiased
+  -moz-osx-font-smoothing: grayscale
+  color: white
+
+button
+  @include base-button
+
+a
+  @include base-anchor
+  
+
+h1
+  font-size: 24px
