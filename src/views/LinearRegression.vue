@@ -25,7 +25,7 @@
           button(@click="optimizeMulti") Train Model (100x)
         .actions.actions-plot
           button(@click="onPrintPredictionClick") Plot Prediction
-          button(@click="drawRegressionLine") Plot Regression Line
+          button(@click="onDrawRegressionLineClick") Plot Regression Line
         div(v-show="lossDisplay != null") loss (error): {{ lossDisplay }}
     LinearScatter(@data-array-changed="onDataArrayChanged")
 </template>
@@ -34,8 +34,10 @@
 import * as tf from "@tensorflow/tfjs";
 import { defineComponent, ref } from "vue";
 import LinearScatter from "@/components/plots/LinearScatter.vue";
-import { printPrediction } from "@/compositions/linearScatter";
-import { tidy, TypedArray } from "@tensorflow/tfjs";
+import {
+  printPrediction,
+  drawRegressionLine,
+} from "@/compositions/linearScatter";
 
 export default defineComponent({
   name: "LinearRegression",
@@ -83,10 +85,10 @@ export default defineComponent({
       });
     }
 
-    async function predictValue() {
+    async function predictValue(xValue: number) {
       let data: any;
       tf.tidy(() => {
-        const y = weight.mul(inputValue.value).add(bias);
+        const y = weight.mul(xValue).add(bias);
         data = y.dataSync();
       });
       return data[0];
@@ -96,7 +98,7 @@ export default defineComponent({
       await train(trainX, trainY);
       const b = await bias.data();
       const w = await weight.data();
-      yHatDisplay.value = await predictValue();
+      yHatDisplay.value = await predictValue(inputValue.value);
       biasDisplay.value = b[0];
       weightDisplay.value = w[0];
       printPrediction(inputValue.value, yHatDisplay.value);
@@ -109,8 +111,14 @@ export default defineComponent({
     }
 
     async function onPrintPredictionClick() {
-      yHatDisplay.value = await predictValue();
+      yHatDisplay.value = await predictValue(inputValue.value);
       printPrediction(inputValue.value, yHatDisplay.value);
+    }
+
+    async function onDrawRegressionLineClick() {
+      const y1Hat = await predictValue(0);
+      const y2Hat = await predictValue(10);
+      drawRegressionLine(y1Hat, y2Hat);
     }
 
     return {
@@ -127,8 +135,8 @@ export default defineComponent({
       inputValue,
       optimize,
       optimizeMulti,
-      printPrediction,
       onPrintPredictionClick,
+      onDrawRegressionLineClick,
     };
   },
 });

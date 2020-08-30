@@ -46,24 +46,6 @@ export default defineComponent({
       context.emit("data-array-changed", { xTrain, yTrain });
     }
 
-    // function drawRegressionLine() {
-    //   if (document.querySelector(".regression-line")) {
-    //     document.querySelector(".regression-line")?.remove();
-    //   }
-    //   const x1 = 0;
-    //   const x2 = 10;
-
-    //   svgData.svg
-    //     .append("line")
-    //     .attr("x1", svgData.xAxis(x1))
-    //     .attr("y1", svgData.yAxis(props.y1Hat))
-    //     .attr("x2", svgData.xAxis(x2))
-    //     .attr("y2", svgData.yAxis(props.y2Hat))
-    //     .attr("stroke", "teal")
-    //     .attr("stroke-width", 4)
-    //     .attr("class", "regression-line");
-    // }
-
     onMounted(() => {
       selectDataSet(selectedDataset.value);
     });

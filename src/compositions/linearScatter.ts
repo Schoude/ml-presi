@@ -86,3 +86,21 @@ export async function printPrediction(x: number, yHat: number) {
     .attr("r", 5)
     .style("fill", "#2ec72e");
 }
+
+export function drawRegressionLine(y1Hat: number, y2Hat: number) {
+  if (document.querySelector(".regression-line")) {
+    document.querySelector(".regression-line")?.remove();
+  }
+  const x1 = 0;
+  const x2 = 10;
+
+  svg
+    .append("line")
+    .attr("x1", xAxis(x1))
+    .attr("y1", yAxis(y1Hat))
+    .attr("x2", xAxis(x2))
+    .attr("y2", yAxis(y2Hat))
+    .attr("stroke", "teal")
+    .attr("stroke-width", 4)
+    .attr("class", "regression-line");
+}
