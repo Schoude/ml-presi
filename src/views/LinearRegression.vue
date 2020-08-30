@@ -131,7 +131,7 @@ export default defineComponent({
     async function onDrawRegressionLineClick() {
       const y1Hat = await predictValue(0);
       const y2Hat = await predictValue(10);
-      drawRegressionLine(y1Hat, y2Hat);
+      drawRegressionLine(y1Hat, y2Hat, weightDisplay.value, biasDisplay.value);
     }
 
     return {

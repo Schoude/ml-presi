@@ -60,6 +60,14 @@ export function initScatter(domQuery: string) {
 * Plot the date to the svg.
 */
 export function plotData() {
+  const tooltip = d3
+    .select("body")
+    .append("div")
+    .attr("class", "tooltip")
+    .style("position", "absolute")
+    .style("z-index", "10")
+    .style("visibility", "hidden");
+
   svg
     .append("g")
     .selectAll("dot")
@@ -69,13 +77,33 @@ export function plotData() {
     .attr("class", "train-dots")
     .attr("cx", (d: { x: number; y: number }) => xAxis(d.x))
     .attr("cy", (d: { x: number; y: number }) => yAxis(d.y))
-    .attr("r", 3);
+    .attr("r", 3).on("mouseover", function (e: MouseEvent, d: { x: number; y: number }) {
+      return tooltip
+        .style("visibility", "visible")
+        .style("top", e.clientY - 25 + "px")
+        .style("left", e.clientX + 20 + "px")
+        .html(`x = ${d.x}<br>y = ${d.y}`);
+    })
+    .on("mouseout", function () {
+      return tooltip.style("visibility", "hidden");
+    });
 }
 
 export async function printPrediction(x: number, yHat: number) {
+  if (document.querySelector('.prediction')) {
+    document.querySelector('.prediction')!.remove();
+  }
   if (document.querySelector('.predicted')) {
     document.querySelector('.predicted')!.remove();
   }
+
+  const tooltip = d3
+    .select("body")
+    .append("div")
+    .attr("class", "tooltip prediction")
+    .style("position", "absolute")
+    .style("z-index", "10")
+    .style("visibility", "hidden");
 
   svg
     .append("g")
@@ -84,15 +112,36 @@ export async function printPrediction(x: number, yHat: number) {
     .attr("cx", () => xAxis(x))
     .attr("cy", () => yAxis(yHat))
     .attr("r", 5)
-    .style("fill", "#2ec72e");
+    .style("fill", "#2ec72e").on("mouseover", (e: MouseEvent) => {
+      return tooltip
+        .style("visibility", "visible")
+        .style("top", e.clientY - 25 + "px")
+        .style("left", e.clientX + 20 + "px")
+        .html(
+          `x = ${x}<br>y' = ${yHat.toFixed(2)}`
+        )
+    })
+    .on("mouseout", () => tooltip.style("visibility", "hidden"));
 }
 
-export function drawRegressionLine(y1Hat: number, y2Hat: number) {
+export function drawRegressionLine(y1Hat: number, y2Hat: number, weight: number, bias: number) {
+  if (document.querySelector('.line')) {
+    document.querySelector('.line')!.remove();
+  }
+
   if (document.querySelector(".regression-line")) {
     document.querySelector(".regression-line")?.remove();
   }
   const x1 = 0;
   const x2 = 10;
+
+  const tooltip = d3
+    .select("body")
+    .append("div")
+    .attr("class", "tooltip line")
+    .style("position", "absolute")
+    .style("z-index", "10")
+    .style("visibility", "hidden");
 
   svg
     .append("line")
@@ -102,5 +151,18 @@ export function drawRegressionLine(y1Hat: number, y2Hat: number) {
     .attr("y2", yAxis(y2Hat))
     .attr("stroke", "teal")
     .attr("stroke-width", 4)
-    .attr("class", "regression-line");
+    .attr("class", "regression-line").on("mouseover", (e: MouseEvent) => {
+      return tooltip
+        .style("visibility", "visible")
+        .style("top", e.clientY - 25 + "px")
+        .style("left", e.clientX + 20 + "px")
+        .html(
+          `y' = ${bias.toFixed(2)} + ${weight.toFixed(
+            2
+          )} · x`
+        );
+    })
+    .on("mouseout", function () {
+      return tooltip.style("visibility", "hidden");
+    });
 }
