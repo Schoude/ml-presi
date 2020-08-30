@@ -1,0 +1,1 @@
+export type D3Data = { x: number; y: number }[]
