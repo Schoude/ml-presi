@@ -43,29 +43,41 @@ export default defineComponent({
   name: "LinearRegression",
   components: { LinearScatter },
   setup() {
-    const yHat = ref(0);
     const yHatDisplay = ref(0);
-    const y1Hat = ref(0);
-    const y2Hat = ref(0);
-    const weight = tf.variable(tf.scalar(Math.random()));
+    let weight = tf.variable(tf.scalar(Math.random()));
     const weightDisplay = ref(0);
-    const bias = tf.variable(tf.scalar(Math.random()));
+    let bias = tf.variable(tf.scalar(Math.random()));
     const biasDisplay = ref(0);
     const lossDisplay = ref(null);
     let trainX: number[] = [];
     let trainY: number[] = [];
     const inputValue = ref(0);
-    const learningRate = 0.01;
+    const learningRate = 0.035;
     const optimizer = tf.train.sgd(learningRate);
 
     tf.setBackend("webgl");
 
-    function onDataArrayChanged(payload: {
+    async function resetRegressionParams() {
+      weight.dispose();
+      bias.dispose();
+      weight = tf.variable(tf.scalar(Math.random()));
+      bias = tf.variable(tf.scalar(Math.random()));
+      const b = await bias.data();
+      const w = await weight.data();
+      biasDisplay.value = b[0];
+      weightDisplay.value = w[0];
+      yHatDisplay.value = 0;
+    }
+
+    async function onDataArrayChanged(payload: {
       xTrain: number[];
       yTrain: number[];
     }) {
       trainX = payload.xTrain;
       trainY = payload.yTrain;
+      tf.tidy(() => {
+        resetRegressionParams();
+      });
     }
 
     function predict(x: any) {
@@ -81,6 +93,7 @@ export default defineComponent({
       optimizer.minimize(() => {
         const predsYs = predict(tf.tensor1d(trainX));
         const stepLoss = loss(predsYs, tf.tensor1d(trainY));
+        lossDisplay.value = stepLoss.dataSync()[0];
         return stepLoss;
       });
     }
@@ -127,11 +140,6 @@ export default defineComponent({
       biasDisplay,
       lossDisplay,
       onDataArrayChanged,
-      weight,
-      bias,
-      yHat,
-      y1Hat,
-      y2Hat,
       inputValue,
       optimize,
       optimizeMulti,
@@ -166,7 +174,7 @@ dd:not(:last-child)
 
 .definitions
   div
-    margin-top: 8px
+    margin-top: 20px
 
 .model-params
   .actions
