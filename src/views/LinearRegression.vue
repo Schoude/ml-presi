@@ -14,7 +14,6 @@
         dd b = bias (y-intercept)
         dd w = weight (slope)
         dd x = feature (input variable)
-    //- #viz-linreg
     LinearScatter
 </template>
 
