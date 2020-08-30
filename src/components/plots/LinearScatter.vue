@@ -4,6 +4,7 @@
     button(:disabled="selectedDataset === 1", @click="selectDataSet(1)") Perfect Line
     button(:disabled="selectedDataset === 2", @click="selectDataSet(2)") Scattered Points
   #viz-linreg
+  button(@click="drawRegressionLine") drawRegressionLine
   span.correlation(v-show="correlationValue") Pairwise correlation between x and y: {{ correlationValue }}
 </template>
 
@@ -18,8 +19,23 @@ import StatsLib from "@/statslib/index";
 
 export default defineComponent({
   name: "LinearScatter",
-  setup() {
+  props: {
+    weight: {
+      type: Number,
+    },
+    bias: {
+      type: Number,
+    },
+    y1Hat: {
+      type: Number,
+    },
+    y2Hat: {
+      type: Number,
+    },
+  },
+  setup(props, context) {
     const selectedDataset = ref(1);
+    let svgData: any;
     const rangeX: number[] = [0, 7];
     const rangeY: number[] = [0, 140000];
     let xTrain: number[] = [];
@@ -42,21 +58,42 @@ export default defineComponent({
         selectedDataset.value = dataSetId;
       }
 
-      const { svg: mySvg, xAxis: x, yAxis: y } = initScatter(
-        "#viz-linreg",
-        rangeX,
-        rangeY
-      );
+      svgData = initScatter("#viz-linreg", rangeX, rangeY);
       const d3Data = setUpD3Data(xTrain, yTrain);
-      plotData(d3Data, mySvg, x, y);
+      console.log(d3Data);
+      plotData(d3Data, svgData.svg, svgData.xAxis, svgData.yAxis);
       correlationValue.value = sLib.correlation(xTrain, yTrain);
+      context.emit("data-changed", d3Data);
+    }
+
+    function drawRegressionLine() {
+      if (document.querySelector(".regression-line")) {
+        document.querySelector(".regression-line")?.remove();
+      }
+      const x1 = 0;
+      const x2 = 10;
+
+      svgData.svg
+        .append("line")
+        .attr("x1", svgData.xAxis(x1))
+        .attr("y1", svgData.yAxis(props.y1Hat))
+        .attr("x2", svgData.xAxis(x2))
+        .attr("y2", svgData.yAxis(props.y2Hat))
+        .attr("stroke", "teal")
+        .attr("stroke-width", 4)
+        .attr("class", "regression-line");
     }
 
     onMounted(() => {
       selectDataSet(selectedDataset.value);
     });
 
-    return { selectedDataset, selectDataSet, correlationValue };
+    return {
+      selectedDataset,
+      selectDataSet,
+      correlationValue,
+      drawRegressionLine,
+    };
   },
 });
 </script>
@@ -67,7 +104,7 @@ export default defineComponent({
   flex-direction: column
 
 #viz-linreg
-  margin: 36px 0
+  margin: 30px 0
 
 .actions
   button
@@ -77,6 +114,7 @@ export default defineComponent({
     &:disabled
       opacity: 0.4
       cursor: not-allowed
-.correlation
 
+.correlation
+  margin-top: 30px
 </style>

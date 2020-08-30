@@ -14,8 +14,8 @@ export function setUpD3Data(xData: number[], yData: number[]): D3Data {
 }
 
 /**
-     * Init the scatterplot with the axis for the given ranges.
-     */
+ * Init the scatterplot with the axis for the given ranges.
+ */
 export function initScatter(domQuery: string, rangeX: number[], rangeY: number[]) {
   const margin = { top: 10, right: 30, bottom: 30, left: 60 },
     width = 460 - margin.left - margin.right,

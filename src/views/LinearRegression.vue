@@ -14,17 +14,63 @@
         dd b = bias (y-intercept)
         dd w = weight (slope)
         dd x = feature (input variable)
-    LinearScatter
+      hr
+      .model-params
+        div y': {{ yHatDisplay }}
+        div weight: {{ weightDisplay }}
+        div bias: {{ biasDisplay }}
+        .actions
+          button Fit line (1x)
+          button Fit line (100x)
+        div(v-show="lossDisplay != null") loss (error): {{ lossDisplay }}
+    LinearScatter(
+      @data-changed="onDataChanged",
+      :weight="weight",
+      :bias="bias",
+      :y1Hat="y1Hat"
+      :y2Hat="y2Hat"
+    )
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, ref } from "vue";
 
 import LinearScatter from "@/components/plots/LinearScatter.vue";
+import { D3Data } from "@/typings/d3";
 
 export default defineComponent({
   name: "LinearRegression",
   components: { LinearScatter },
+  setup() {
+    const yHat = ref(0);
+    const yHatDisplay = ref(0);
+    const y1Hat = ref(0);
+    const y2Hat = ref(0);
+    const weight = ref(0);
+    const weightDisplay = ref(0);
+    const bias = ref(0);
+    const biasDisplay = ref(0);
+    const lossDisplay = ref(null);
+    let d3Data: D3Data = [];
+
+    function onDataChanged(data: D3Data) {
+      d3Data = data;
+      console.log(d3Data);
+    }
+
+    return {
+      yHatDisplay,
+      weightDisplay,
+      biasDisplay,
+      lossDisplay,
+      onDataChanged,
+      weight,
+      bias,
+      yHat,
+      y1Hat,
+      y2Hat
+    };
+  },
 });
 </script>
 
@@ -44,6 +90,22 @@ a
   justify-content: space-around
   margin-top: 50px
 
+.definitions
+  width: 33%
+
 dd:not(:last-child)
   margin-bottom: 4px
+
+.definitions
+  div
+    margin-top: 8px
+
+.model-params
+  .actions
+    margin-top: 8px
+    display: flex
+    justify-content: space-between
+
+    button
+      width: 45%
 </style>
