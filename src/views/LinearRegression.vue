@@ -19,24 +19,23 @@
         div y': {{ yHatDisplay }}
         div weight: {{ weightDisplay }}
         div bias: {{ biasDisplay }}
-        .actions
-          button Fit line (1x)
-          button Fit line (100x)
+        input(type="number", v-model.number="inputValue")
+        .actions.actions-model
+          button(@click="optimize") Train Model (1x)
+          button(@click="optimizeMulti") Train Model (100x)
+        .actions.actions-plot
+          button(@click="onPrintPredictionClick") Plot Prediction
+          button(@click="drawRegressionLine") Plot Regression Line
         div(v-show="lossDisplay != null") loss (error): {{ lossDisplay }}
-    LinearScatter(
-      @data-changed="onDataChanged",
-      :weight="weight",
-      :bias="bias",
-      :y1Hat="y1Hat"
-      :y2Hat="y2Hat"
-    )
+    LinearScatter(@data-array-changed="onDataArrayChanged")
 </template>
 
 <script lang="ts">
+import * as tf from "@tensorflow/tfjs";
 import { defineComponent, ref } from "vue";
-
 import LinearScatter from "@/components/plots/LinearScatter.vue";
-import { D3Data } from "@/typings/d3";
+import { printPrediction } from "@/compositions/linearScatter";
+import { tidy, TypedArray } from "@tensorflow/tfjs";
 
 export default defineComponent({
   name: "LinearRegression",
@@ -46,16 +45,72 @@ export default defineComponent({
     const yHatDisplay = ref(0);
     const y1Hat = ref(0);
     const y2Hat = ref(0);
-    const weight = ref(0);
+    const weight = tf.variable(tf.scalar(Math.random()));
     const weightDisplay = ref(0);
-    const bias = ref(0);
+    const bias = tf.variable(tf.scalar(Math.random()));
     const biasDisplay = ref(0);
     const lossDisplay = ref(null);
-    let d3Data: D3Data = [];
+    let trainX: number[] = [];
+    let trainY: number[] = [];
+    const inputValue = ref(0);
+    const learningRate = 0.01;
+    const optimizer = tf.train.sgd(learningRate);
 
-    function onDataChanged(data: D3Data) {
-      d3Data = data;
-      console.log(d3Data);
+    tf.setBackend("webgl");
+
+    function onDataArrayChanged(payload: {
+      xTrain: number[];
+      yTrain: number[];
+    }) {
+      trainX = payload.xTrain;
+      trainY = payload.yTrain;
+    }
+
+    function predict(x: any) {
+      return tf.tidy(() => weight.mul(x).add(bias));
+    }
+
+    function loss(predictions: any, actualValues: any) {
+      const error = predictions.sub(actualValues).square().mean();
+      return error;
+    }
+
+    function train(trainX: number[], trainY: number[]) {
+      optimizer.minimize(() => {
+        const predsYs = predict(tf.tensor1d(trainX));
+        const stepLoss = loss(predsYs, tf.tensor1d(trainY));
+        return stepLoss;
+      });
+    }
+
+    async function predictValue() {
+      let data: any;
+      tf.tidy(() => {
+        const y = weight.mul(inputValue.value).add(bias);
+        data = y.dataSync();
+      });
+      return data[0];
+    }
+
+    async function optimize() {
+      await train(trainX, trainY);
+      const b = await bias.data();
+      const w = await weight.data();
+      yHatDisplay.value = await predictValue();
+      biasDisplay.value = b[0];
+      weightDisplay.value = w[0];
+      printPrediction(inputValue.value, yHatDisplay.value);
+    }
+
+    function optimizeMulti() {
+      for (let i = 0; i < 100; i++) {
+        optimize();
+      }
+    }
+
+    async function onPrintPredictionClick() {
+      yHatDisplay.value = await predictValue();
+      printPrediction(inputValue.value, yHatDisplay.value);
     }
 
     return {
@@ -63,12 +118,17 @@ export default defineComponent({
       weightDisplay,
       biasDisplay,
       lossDisplay,
-      onDataChanged,
+      onDataArrayChanged,
       weight,
       bias,
       yHat,
       y1Hat,
-      y2Hat
+      y2Hat,
+      inputValue,
+      optimize,
+      optimizeMulti,
+      printPrediction,
+      onPrintPredictionClick,
     };
   },
 });
@@ -105,6 +165,9 @@ dd:not(:last-child)
     margin-top: 8px
     display: flex
     justify-content: space-between
+
+    &-model
+      margin-bottom: 24px
 
     button
       width: 45%
