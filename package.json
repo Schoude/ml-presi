@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@tensorflow/tfjs": "^2.3.0",
+    "@tensorflow/tfjs-vis": "^1.4.3",
     "@types/d3": "^5.7.2",
     "core-js": "^3.6.5",
     "d3": "^6.1.0",
