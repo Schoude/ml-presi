@@ -28,12 +28,20 @@
           button.plot-action(@click="onDrawRegressionLineClick") Plot Regression Line
         div(v-show="lossDisplay != null") loss (error): {{ lossDisplay }}
     LinearScatter(@data-array-changed="onDataArrayChanged")
+  hr
+  button(@click="loadFullModel = true", v-if="!loadFullModel") Load full model
+  Suspense(v-if="loadFullModel")
+    template(#default)
+      LinRegFullModel
+    template(#fallback)
+      h3 Fetching data...
 </template>
 
 <script lang="ts">
 import * as tf from "@tensorflow/tfjs";
 import { defineComponent, ref } from "vue";
 import LinearScatter from "@/components/plots/LinearScatter.vue";
+import LinRegFullModel from "@/components/LinRegFullModel.vue";
 import {
   printPrediction,
   drawRegressionLine,
@@ -41,8 +49,10 @@ import {
 
 export default defineComponent({
   name: "LinearRegression",
-  components: { LinearScatter },
+  components: { LinearScatter, LinRegFullModel },
   setup() {
+    const loadFullModel = ref(false);
+
     const yHatDisplay = ref(0);
     let weight = tf.variable(tf.scalar(Math.random()));
     const weightDisplay = ref(0);
@@ -135,6 +145,7 @@ export default defineComponent({
     }
 
     return {
+      loadFullModel,
       yHatDisplay,
       weightDisplay,
       biasDisplay,
