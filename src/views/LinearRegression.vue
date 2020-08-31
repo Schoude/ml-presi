@@ -24,8 +24,8 @@
           button(@click="optimize") Train Model (1x)
           button(@click="optimizeMulti") Train Model (100x)
         .actions.actions-plot
-          button(@click="onPrintPredictionClick") Plot Prediction
-          button(@click="onDrawRegressionLineClick") Plot Regression Line
+          button.plot-action(@click="onPrintPredictionClick") Plot Prediction
+          button.plot-action(@click="onDrawRegressionLineClick") Plot Regression Line
         div(v-show="lossDisplay != null") loss (error): {{ lossDisplay }}
     LinearScatter(@data-array-changed="onDataArrayChanged")
 </template>
