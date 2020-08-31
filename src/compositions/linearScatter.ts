@@ -80,8 +80,8 @@ export function plotData() {
     .attr("r", 3).on("mouseover", function (e: MouseEvent, d: { x: number; y: number }) {
       return tooltip
         .style("visibility", "visible")
-        .style("top", e.clientY - 25 + "px")
-        .style("left", e.clientX + 20 + "px")
+        .style("top", e.clientY + window.scrollY - 25 + "px")
+        .style("left", e.clientX - 130 + "px")
         .html(`x = ${d.x}<br>y = ${d.y}`);
     })
     .on("mouseout", function () {
@@ -115,8 +115,8 @@ export async function printPrediction(x: number, yHat: number) {
     .style("fill", "#2ec72e").on("mouseover", (e: MouseEvent) => {
       return tooltip
         .style("visibility", "visible")
-        .style("top", e.clientY - 25 + "px")
-        .style("left", e.clientX + 20 + "px")
+        .style("top", e.clientY + window.scrollY - 25 + "px")
+        .style("left", e.clientX - 130 + "px")
         .html(
           `x = ${x}<br>y' = ${yHat.toFixed(2)}`
         )
@@ -154,8 +154,8 @@ export function drawRegressionLine(y1Hat: number, y2Hat: number, weight: number,
     .attr("class", "regression-line").on("mouseover", (e: MouseEvent) => {
       return tooltip
         .style("visibility", "visible")
-        .style("top", e.clientY - 25 + "px")
-        .style("left", e.clientX + 20 + "px")
+        .style("top", e.clientY + window.scrollY - 50 + "px")
+        .style("left", e.clientX - 100 + "px")
         .html(
           `y' = ${bias.toFixed(2)} + ${weight.toFixed(
             2

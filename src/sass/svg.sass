@@ -1,15 +1,23 @@
 .train-dots
   fill: $color-tfjs
 
+  &:hover
+    r: 10
+
+.predicted:hover
+  r: 10
+
 .tooltip
   color: white
   background-color: black
   padding: 8px
   border-radius: 4px
   font-family: 'Alata', sans-serif
+  max-width: 130px
 
   &.prediction
     background-color: steelblue
 
   &.line
     background-color: forestgreen
+    max-width: auto
