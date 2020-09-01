@@ -17,6 +17,7 @@
         @click="onPlotPredictionClick"
         v-if="modelTrained"
       ) Plot Prediction
+      span(v-if="predictedValue !== 0" ) Predicted: {{ predictedValue.toFixed(2) }} €
     .viz(v-if="isTraining")
       h5 Loss
       .loss-cont(ref="lossCont")
@@ -39,6 +40,8 @@ import {
   setUpD3Data,
   initScatter,
   plotData,
+  printPrediction,
+  drawRegressionLine
 } from "../compositions/linearRegressionFullModel";
 import StatsLib from "@/statslib/index";
 import * as tf from "@tensorflow/tfjs";
@@ -74,6 +77,8 @@ export default defineComponent({
     const isTraining = ref(false);
     const modelTrained = ref(false);
     const inputValue = ref(40);
+    const predictedValue = ref(0)
+
     // For TensorFlow
     linearModel = tf.sequential();
     xsTrain = tf.tensor(size, [size.length, 1]);
@@ -101,13 +106,13 @@ export default defineComponent({
       metrics: [tf.metrics.meanAbsoluteError],
     });
 
-    function linearPrediction(val: number) {
+    function linearPrediction(val: number): number {
       const output = linearModel!.predict(tf.tensor2d([val], [1, 1])) as tf.Tensor<tf.Rank>;
 
       const predictedValue = Array.from(output.dataSync())[0];
       output.dispose();
-      console.log(predictedValue);
       console.log(tf.memory().numTensors);
+      return predictedValue;
     }
 
     async function fitModel(
@@ -134,6 +139,12 @@ export default defineComponent({
           },
         },
       });
+
+      tf.tidy(() => {
+        const y1hat = linearPrediction(40)
+        const y2hat = linearPrediction(170)
+        drawRegressionLine(40, 170, y1hat, y2hat);
+      })
     }
 
      async function onFitModelClick() {
@@ -146,11 +157,12 @@ export default defineComponent({
 
     function onPlotPredictionClick() {
       tf.tidy(() => {
-        linearPrediction(inputValue.value);
+        predictedValue.value = linearPrediction(inputValue.value);
+        printPrediction(inputValue.value, predictedValue.value);
       });
     }
 
-    return { correlationValue, n, lossCont, accCont, onFitModelClick, isTraining, modelTrained, inputValue, onPlotPredictionClick};
+    return { correlationValue, n, lossCont, accCont, onFitModelClick, isTraining, modelTrained, inputValue, onPlotPredictionClick, predictedValue};
   },
 });
 </script>
@@ -173,6 +185,9 @@ export default defineComponent({
 
   input
     margin: 0 24px 0 24px
+
+  .plot-action
+    margin-right: 24px
 
 #my-lin-regfull-model
   margin: 30px 0

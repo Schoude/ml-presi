@@ -71,7 +71,7 @@ export function initScatter(domQuery: string) {
   svg = d3
     .select(domQuery)
     .append("svg")
-    .attr("class", "lin-svg")
+    .attr("class", "lin-full-svg")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
     .append("g")
@@ -130,4 +130,56 @@ export function plotData() {
     .on("mouseout", function () {
       return tooltip.style("visibility", "hidden");
     });
+}
+
+export async function printPrediction(x: number, yHat: number) {
+  if (document.querySelector('.prediction-full')) {
+    document.querySelector('.prediction-full')!.remove();
+  }
+  if (document.querySelector('.predicted-full')) {
+    document.querySelector('.predicted-full')!.remove();
+  }
+
+  const tooltip = d3
+    .select("body")
+    .append("div")
+    .attr("class", "tooltip prediction-full")
+    .style("position", "absolute")
+    .style("z-index", "10")
+    .style("visibility", "hidden");
+
+  svg
+    .append("g")
+    .append("circle")
+    .attr("class", "predicted-full")
+    .attr("cx", () => xAxis(x))
+    .attr("cy", () => yAxis(yHat))
+    .attr("r", 5)
+    .style("fill", "#2ec72e").on("mouseover", (e: MouseEvent) => {
+      return tooltip
+        .style("visibility", "visible")
+        .style("top", e.clientY + window.scrollY - 25 + "px")
+        .style("left", e.clientX - 130 + "px")
+        .html(
+          `x = ${x}<br>y' = ${yHat.toFixed(2)}`
+        )
+    })
+    .on("mouseout", () => tooltip.style("visibility", "hidden"));
+}
+
+export function drawRegressionLine(x1: number, x2: number, y1Hat: number, y2Hat: number) {
+  if (document.querySelector(".regression-line-full")) {
+    document.querySelector(".regression-line-full")?.remove();
+  }
+
+  svg
+    .append("line")
+    .attr("x1", xAxis(x1))
+    .attr("y1", yAxis(y1Hat))
+    .attr("x2", xAxis(x2))
+    .attr("y2", yAxis(y2Hat))
+    .attr("stroke", "teal")
+    .attr("stroke-width", 3)
+    .attr("class", "regression-line-full")
+    .lower();
 }

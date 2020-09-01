@@ -11,6 +11,16 @@ const routes: Array<RouteRecordRaw> = [
     name: 'LinearRegression',
     component: () => import('../views/LinearRegression.vue')
   },
+  {
+    path: '/logreg',
+    name: 'LogisticRegression',
+    component: () => import('../views/LogisticRegression.vue')
+  },
+  {
+    path: '/cat',
+    name: 'Categorization',
+    component: () => import('../views/Categorization.vue')
+  },
 ]
 
 const router = createRouter({

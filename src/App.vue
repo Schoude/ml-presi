@@ -41,5 +41,5 @@ export default defineComponent({
       color: $color-tfjs
 
 .view
-  padding: 0 24px
+  padding: 0 42px
 </style>
