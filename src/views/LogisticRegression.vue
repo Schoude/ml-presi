@@ -1,6 +1,8 @@
 <template lang="pug">
 .logistic-regression
-  h1 TODO
+  .header
+    h3 Prediction of a binary outcome
+    img.lin-vs-log(src="../assets/lin-vs-log-reg.jpg")
 </template>
 
 <script lang="ts">
@@ -17,7 +19,7 @@ export default defineComponent({
   async setup() {
     const data = (await loadCSVData()) as KeyableObject;
     console.log("raw data", data);
-    const [trainDs, validationDs] = createDatasets(
+    const [trainData, validationDatal] = createDatasets(
       data,
       ["size", "rooms"],
       "sold",
@@ -35,5 +37,19 @@ export default defineComponent({
 </script>
 
 <style lang="sass" scoped>
+.logistic-regression
+  min-height: 100vh
 
+.header
+  display: flex
+  flex-direction: column
+  align-items: center
+
+.lin-vs-log
+  width: 150px
+  transition: transform 0.3s ease, width 0.3s ease
+
+  &:hover
+    width: 700px
+    transform: translateY(30px)
 </style>

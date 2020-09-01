@@ -5,7 +5,11 @@
     router-link(to="/linreg") Linear Regression
     router-link(to="/logreg") Logistic Regression
     router-link(to="/cat") Categorization
-  router-view.view
+  Suspense
+    template(#default)
+      router-view.view
+    template(#fallback)
+      span Loading data
 </template>
 
 <script lang="ts">
