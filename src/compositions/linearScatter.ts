@@ -151,7 +151,9 @@ export function drawRegressionLine(y1Hat: number, y2Hat: number, weight: number,
     .attr("y2", yAxis(y2Hat))
     .attr("stroke", "teal")
     .attr("stroke-width", 4)
-    .attr("class", "regression-line").on("mouseover", (e: MouseEvent) => {
+    .attr("class", "regression-line")
+    .lower()
+    .on("mouseover", (e: MouseEvent) => {
       return tooltip
         .style("visibility", "visible")
         .style("top", e.clientY + window.scrollY - 50 + "px")
