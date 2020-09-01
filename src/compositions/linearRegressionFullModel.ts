@@ -21,7 +21,12 @@ async function loadCSVData(): Promise<{ [key: string]: any }> {
   let headers: string[] = [];
   const returnObject: { [key: string]: any } = {};
   return new Promise((resolve) => {
-    Papa.parse("http://localhost:8081/csv/unit-data-dummy.csv", {
+    let csvUrl = 'https://mlforshowandtell.tk/csv/unit-data-dummy.csv';
+    if (process.env.NODE_ENV == 'development') {
+      csvUrl = "http://localhost:8081/csv/unit-data-dummy.csv" as string;
+    }
+
+    Papa.parse(csvUrl, {
       download: true,
       dynamicTyping: true,
       complete: ({ data }: { data: string[] }) => {

@@ -70,7 +70,7 @@ export default defineComponent({
       optimizer.dispose();
     });
 
-    tf.setBackend("webgl");
+    // tf.setBackend("webgl");
 
     async function resetRegressionParams() {
       weight.dispose();

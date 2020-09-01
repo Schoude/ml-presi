@@ -16,8 +16,6 @@
     .viz(v-if="isTraining")
       h5 Loss
       .loss-cont(ref="lossCont")
-      h5 Accuracy
-      .acc-cont(ref="accCont")
   .plot
     #my-lin-regfull-model
     span.correlation(v-show="correlationValue") Pairwise correlation between x and y: {{ correlationValue }} (n = {{ n }})
@@ -127,12 +125,9 @@ export default defineComponent({
             trainLogs.push({
               rmse: Math.sqrt(logs!.loss),
               "val_rmse": Math.sqrt(logs!.val_loss),
-              mae: logs!["meanAbsoluteError"],
-              "val_mae": logs!["val_meanAbsoluteError"],
             });
 
             tfvis.show.history(lossCont.value, trainLogs, ["rmse", "val_rmse"]);
-            tfvis.show.history(accCont.value, trainLogs, ["mae", "val_mae"]);
           },
         },
       });
