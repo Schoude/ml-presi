@@ -3,21 +3,16 @@
   .model
     h3 Trainable Model for <b>roomsize -> price</b> data
     .actions
-      button(
-        @click="onFitModelClick"
-        :disabled="modelTrained || isTraining"
-      ) Train Model
+      button(@click="onFitModelClick", :disabled="modelTrained || isTraining") Train Model
       input(
-        min="40"
-        type="number" placeholder="Enter m²"
-        v-if="modelTrained"
+        min="40",
+        type="number",
+        placeholder="Enter m²",
+        v-if="modelTrained",
         v-model.number="inputValue"
       )
-      button.plot-action(
-        @click="onPlotPredictionClick"
-        v-if="modelTrained"
-      ) Plot Prediction
-      span(v-if="predictedValue !== 0" ) Predicted: {{ predictedValue.toFixed(2) }} €
+      button.plot-action(@click="onPlotPredictionClick", v-if="modelTrained") Plot Prediction
+      span(v-if="predictedValue !== 0") Predicted: {{ predictedValue.toFixed(2) }} €
     .viz(v-if="isTraining")
       h5 Loss
       .loss-cont(ref="lossCont")
@@ -77,7 +72,7 @@ export default defineComponent({
     const isTraining = ref(false);
     const modelTrained = ref(false);
     const inputValue = ref(40);
-    const predictedValue = ref(0)
+    const predictedValue = ref(0);
 
     // For TensorFlow
     linearModel = tf.sequential();
@@ -107,7 +102,9 @@ export default defineComponent({
     });
 
     function linearPrediction(val: number): number {
-      const output = linearModel!.predict(tf.tensor2d([val], [1, 1])) as tf.Tensor<tf.Rank>;
+      const output = linearModel!.predict(
+        tf.tensor2d([val], [1, 1])
+      ) as tf.Tensor<tf.Rank>;
 
       const predictedValue = Array.from(output.dataSync())[0];
       output.dispose();
@@ -141,14 +138,14 @@ export default defineComponent({
       });
 
       tf.tidy(() => {
-        const y1hat = linearPrediction(40)
-        const y2hat = linearPrediction(170)
+        const y1hat = linearPrediction(40);
+        const y2hat = linearPrediction(170);
         drawRegressionLine(40, 170, y1hat, y2hat);
-      })
+      });
     }
 
-     async function onFitModelClick() {
-       isTraining.value = true;
+    async function onFitModelClick() {
+      isTraining.value = true;
       console.log(tf.memory().numTensors);
       await fitModel(xsTrain!, ys!);
       modelTrained.value = true;
@@ -162,7 +159,18 @@ export default defineComponent({
       });
     }
 
-    return { correlationValue, n, lossCont, accCont, onFitModelClick, isTraining, modelTrained, inputValue, onPlotPredictionClick, predictedValue};
+    return {
+      correlationValue,
+      n,
+      lossCont,
+      accCont,
+      onFitModelClick,
+      isTraining,
+      modelTrained,
+      inputValue,
+      onPlotPredictionClick,
+      predictedValue,
+    };
   },
 });
 </script>
