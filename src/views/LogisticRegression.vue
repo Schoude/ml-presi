@@ -5,10 +5,16 @@
     img.lin-vs-log(src="../assets/lin-vs-log-reg.jpg")
   .content
     button(@click="trainModel") Train Model
+    // .viz(v-if="isTraining")
+    .viz
+      h5 Accuracy
+      .acc-cont(ref="accCont")
+      h5 Loss
+      .loss-cont(ref="lossCont")
 </template>
 
 <script lang="ts">
-import { defineComponent, onBeforeUnmount } from "vue";
+import { defineComponent, onBeforeUnmount, ref } from "vue";
 import {
   loadCSVData,
   createDatasets,
@@ -16,10 +22,13 @@ import {
 
 import { KeyableObject } from "../typings/basic.d";
 import * as tf from "@tensorflow/tfjs";
+import * as tfvis from "@tensorflow/tfjs-vis";
 
 export default defineComponent({
   name: "LogisticRegression",
   async setup() {
+    const lossCont = ref(HTMLElement);
+    const accCont = ref(HTMLElement);
     const logModel = tf.sequential();
     onBeforeUnmount(() => {
       logModel.dispose();
@@ -69,9 +78,18 @@ export default defineComponent({
      * Train the model with then training data and the validation data.
      */
     async function trainModel() {
+      const trainLogs: any[] = [];
+
       await logModel.fitDataset(trainData, {
-        epochs: 10,
+        epochs: 100,
         validationData: validationData,
+        callbacks: {
+          onEpochEnd: async (epoch, logs) => {
+            trainLogs.push(logs);
+            tfvis.show.history(lossCont.value, trainLogs, ["loss", "val_loss"]);
+            tfvis.show.history(accCont.value, trainLogs, ["acc", "val_acc"]);
+          },
+        },
       });
       console.log("done training");
       console.log(tf.memory().numTensors);
@@ -79,7 +97,7 @@ export default defineComponent({
 
     await trainLogisticRegression(1);
     // logModel.summary();
-    return { trainModel };
+    return { trainModel, accCont, lossCont };
   },
 });
 </script>
@@ -92,12 +110,19 @@ export default defineComponent({
   display: flex
   flex-direction: column
   align-items: center
+  position: relative
 
 .lin-vs-log
+  position: absolute
+  top: 50px
   width: 150px
   transition: transform 0.3s ease, width 0.3s ease
 
   &:hover
     width: 700px
     transform: translateY(30px)
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.5)
+
+.content
+  margin-top: 50px
 </style>
