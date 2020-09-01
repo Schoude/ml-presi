@@ -1,6 +1,6 @@
 <template lang="pug">
 .linear-regression
-  h3 GOAL: Fit a line that has the <i>minimal distance</i> between every given point in a <a href="https://learningstatisticswithr.com/book/lsr_files/figure-html/regression1a-1.png" target="_blank" rel="noopener noreferrer">scatter plot</a>.
+  h3 GOAL: Fit a line that has the <i>minimal distance</i> to every given point in a <a href="https://learningstatisticswithr.com/book/lsr_files/figure-html/regression1a-1.png" target="_blank" rel="noopener noreferrer">scatter plot</a>.
   .content
     .definitions
       dl.definition-card
