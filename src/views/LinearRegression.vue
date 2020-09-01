@@ -39,7 +39,7 @@
 
 <script lang="ts">
 import * as tf from "@tensorflow/tfjs";
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, onBeforeUnmount } from "vue";
 import LinearScatter from "@/components/plots/LinearScatter.vue";
 import LinRegFullModel from "@/components/LinRegFullModel.vue";
 import {
@@ -52,7 +52,6 @@ export default defineComponent({
   components: { LinearScatter, LinRegFullModel },
   setup() {
     const loadFullModel = ref(false);
-
     const yHatDisplay = ref(0);
     let weight = tf.variable(tf.scalar(Math.random()));
     const weightDisplay = ref(0);
@@ -64,6 +63,12 @@ export default defineComponent({
     const inputValue = ref(0);
     const learningRate = 0.035;
     const optimizer = tf.train.sgd(learningRate);
+
+    onBeforeUnmount(() => {
+      weight.dispose();
+      bias.dispose();
+      optimizer.dispose();
+    });
 
     tf.setBackend("webgl");
 
