@@ -81,6 +81,24 @@ export default defineComponent({
         })
       );
 
+      // model with 2 layers
+      // logModel.add(
+      //   tf.layers.dense({
+      //     units: 12,
+      //     activation: "relu",
+      //     inputShape: [featureCount],
+      //   })
+      // );
+
+      // layers after the first layer don't need an input shape, it is infered from the previous layer.
+      // logModel.add(
+      //   tf.layers.dense({
+      //     // because of "oneHot" encoding
+      //     units: 2,
+      //     activation: "softmax",
+      //   })
+      // );
+
       // compile the mode
       logModel.compile({
         optimizer: tf.train.adam(0.05),
