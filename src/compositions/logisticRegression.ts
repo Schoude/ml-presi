@@ -36,7 +36,7 @@ function oneHot(value: any, valueCount: number): number[] {
  * xs: shape[32, 2] -> 32 = batchSize; 2 = number of features
  * ys: shape[32, 2] -> 32 = batchSize; 2 = binary oneHot coding
  */
-export function createDatasets(data: { [key: string]: any }[], features: string[], label: string, testSize: number, batchSize: number) {
+export function createDatasets(data: { [key: string]: any }[], features: string[], label: string, testSize: number, batchSize: number): any {
 
   /**
    * Creates an array for each row with the features provided
@@ -48,7 +48,6 @@ export function createDatasets(data: { [key: string]: any }[], features: string[
     gets turned into [91, 5, 450000]
    */
   const feturesValues: any[][] = data.map(row => features.map(feature => row[feature] == null ? 0 : row[feature]));
-  console.log('feturesValues', feturesValues);
 
   const labelValues = data.map(row => {
     const labelOutcome = row[label] == null ? 0 : row[label];
@@ -70,9 +69,13 @@ export function createDatasets(data: { [key: string]: any }[], features: string[
   /**
    * [0] => training dataset
    * [1] => validation dataset
+   * [2] => data to run predictions on for xs
+   * [3] => data to run predictions on for ys
    */
   return [
     tfDataSets.take(splitIndex).batch(batchSize),
-    tfDataSets.skip(splitIndex + 1).batch(batchSize)
-  ]
+    tfDataSets.skip(splitIndex + 1).batch(batchSize),
+    tf.tensor(feturesValues.slice(splitIndex)),
+    tf.tensor(labelValues.slice(splitIndex)),
+  ];
 }
