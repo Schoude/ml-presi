@@ -13,10 +13,10 @@
     .outcome(v-show="hasTrained")
       h4 Predicted outcomes
       dl
-        dt 2 rooms
+        dt 2 rooms unit
         dd not sold: ~{{ twoRooms.notSold }}%
         dd sold: ~{{ twoRooms.sold }}%
-        dt 4 rooms
+        dt 4 rooms unit
         dd not sold: ~{{ fourRooms.notSold }}%
         dd sold: ~{{ fourRooms.sold }}%
       p.disclaimer NOTE: The Dataset used is heavily modified so that (almost) all 4 and 5 rooms units are sold. 😅
