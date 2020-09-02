@@ -20,6 +20,9 @@
         dd not sold: ~{{ fourRooms.notSold }}%
         dd sold: ~{{ fourRooms.sold }}%
       p.disclaimer NOTE: The Dataset used is heavily modified so that (almost) all 4 and 5 rooms units are sold. 😅
+    .confusion-matrix(v-show="hasTrained")
+      h4 Confusion matrix of predictions and labels
+      .matrix-container(ref="conMatrix")
 </template>
 
 <script lang="ts">
@@ -39,6 +42,7 @@ export default defineComponent({
   async setup() {
     const lossCont = ref(HTMLElement);
     const accCont = ref(HTMLElement);
+    const conMatrix = ref(HTMLElement);
     const isTraining = ref(false);
     const hasTrained = ref(false);
     const twoRooms = reactive({ sold: 0, notSold: 0 });
@@ -106,9 +110,24 @@ export default defineComponent({
       console.log("done training");
       console.log(tf.memory().numTensors);
 
+      // models on full test datasets
+      // returns the outcome with the higher probability (between outcomes 0 and 1)
+      const preds = (logModel.predict(xTest) as any).argMax(-1);
+      const labels = yTest.argMax(-1);
+
+      // confucion matrix to compare how many predicted results match with the corresponding label
+      const confusionMatrix = await tfvis.metrics.confusionMatrix(
+        labels,
+        preds
+      );
+
+      tfvis.render.confusionMatrix(conMatrix.value, {
+        values: confusionMatrix,
+        tickLabels: ["not sold", "sold"],
+      });
+
       tf.tidy(() => {
-        // const preds = (logModel.predict(xTest) as any).argMax(-1);
-        // const labels = yTest.argMax(-1);
+        // prediction for a sigle value
         const pred1 = logModel.predict(tf.tensor([2])) as any;
         const pred2 = logModel.predict(tf.tensor([4])) as any;
 
@@ -117,17 +136,18 @@ export default defineComponent({
 
         fourRooms.notSold = Math.round(pred2.dataSync()[0] * 100);
         fourRooms.sold = Math.round(pred2.dataSync()[1] * 100);
-
-        hasTrained.value = true;
       });
+      hasTrained.value = true;
     }
 
     await trainLogisticRegression(features.length);
     logModel.summary();
+
     return {
       trainModel,
       accCont,
       lossCont,
+      conMatrix,
       isTraining,
       hasTrained,
       twoRooms,
@@ -140,6 +160,7 @@ export default defineComponent({
 <style lang="sass" scoped>
 .logistic-regression
   min-height: 100vh
+  margin-bottom: 80px
 
 .header
   display: flex
@@ -166,4 +187,7 @@ export default defineComponent({
   color: #ff8d8d
   padding: 6px 8px
   background-color: #333333
+
+.matrix-container
+  max-width: 50%
 </style>
