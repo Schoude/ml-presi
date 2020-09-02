@@ -19,6 +19,7 @@
         dt 4 rooms
         dd not sold: ~{{ fourRooms.notSold }}%
         dd sold: ~{{ fourRooms.sold }}%
+      p.disclaimer NOTE: The Dataset used is heavily modified so that (almost) all 4 and 5 rooms units are sold. 😅
 </template>
 
 <script lang="ts">
@@ -159,4 +160,10 @@ export default defineComponent({
 
 .content
   margin-top: 50px
+
+.disclaimer
+  font-size: 12px
+  color: #ff8d8d
+  padding: 6px 8px
+  background-color: #333333
 </style>
