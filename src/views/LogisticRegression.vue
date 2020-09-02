@@ -92,7 +92,7 @@ export default defineComponent({
       const trainLogs: any[] = [];
 
       await logModel.fitDataset(trainData, {
-        epochs: 100,
+        epochs: 150,
         validationData: validationData,
         callbacks: {
           onEpochEnd: async (epoch, logs) => {
@@ -106,27 +106,17 @@ export default defineComponent({
       console.log(tf.memory().numTensors);
 
       tf.tidy(() => {
-        xTest.print();
-        // const preds = logModel.predict(tf.tensor([[4, 98]])) as any;
-        const pred1 = logModel.predict(tf.tensor([2])) as any;
-        const pred2 = logModel.predict(tf.tensor([4])) as any;
         // const preds = (logModel.predict(xTest) as any).argMax(-1);
         // const labels = yTest.argMax(-1);
-        console.log("pred 2 rooms", pred1.dataSync());
+        const pred1 = logModel.predict(tf.tensor([2])) as any;
+        const pred2 = logModel.predict(tf.tensor([4])) as any;
+
         twoRooms.notSold = Math.round(pred1.dataSync()[0] * 100);
         twoRooms.sold = Math.round(pred1.dataSync()[1] * 100);
 
-        console.log("preds 4 rooms", pred2.dataSync());
         fourRooms.notSold = Math.round(pred2.dataSync()[0] * 100);
         fourRooms.sold = Math.round(pred2.dataSync()[1] * 100);
 
-        console.log("twoRooms.notSold", twoRooms.notSold);
-        console.log("twoRooms.sold", twoRooms.sold);
-        console.log("fourRooms.notSold", fourRooms.notSold);
-        console.log("fourRooms.sold", fourRooms.sold);
-        // console.log("labels", labels.dataSync());
-        // console.log("labels", labels.dataSync());
-        // console.log("labels", labels.dataSync());
         hasTrained.value = true;
       });
     }
