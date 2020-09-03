@@ -24,8 +24,17 @@ export async function loadCSVData(): Promise<{ [key: string]: any }> {
 
 /**
  * Returns a oneHot encoded array.
+ * Adjust the valueCount according to the count possible permutations/values of the variable.
+ * Can be used to define the independent variable for binary and multinomial logistic regression.
+ * 
+ * Variable with two permutations:
  * value = 0 ->[1, 0] -> COLD
  * value = 1 ->[0, 1] -> HOT
+ * 
+ * Variable with four permutations:
+ * value = 2 [0, 1, 0, 0]
+ * value = 4 [0, 0, 0, 1]
+ * 
  */
 function oneHot(value: any, valueCount: number): number[] {
   return Array.from(tf.oneHot([value], valueCount).dataSync())
