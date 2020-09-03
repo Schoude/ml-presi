@@ -1,6 +1,9 @@
 import * as d3 from 'd3';
 import * as Papa from "papaparse";
+import * as tf from "@tensorflow/tfjs";
 import { D3Data } from '@/typings/d3';
+import { Rank } from '@tensorflow/tfjs';
+import { KeyableObject } from '@/typings/basic';
 
 interface FullModelData {
   size: number[];
@@ -52,6 +55,62 @@ export async function getData() {
   const data = await loadCSVData() as FullModelData;
   const { size, price } = data;
   return { size, price }
+}
+
+/**
+ * Helper function that asynchronously returns the csv data.
+ * Each row is an object with the headers as the keys and the values as the values.
+ */
+export async function loadCSVDataFromUrl(csvUrl: string): Promise<object[]> {
+  return new Promise((resolve) => {
+    Papa.parse(csvUrl, {
+      download: true,
+      dynamicTyping: true,
+      header: true,
+      complete: ({ data }: { data: object[] }) => {
+        resolve(data)
+      },
+    });
+  })
+}
+
+function oneHot(value: any, valueCount: number): number[] {
+  return Array.from(tf.oneHot([value], valueCount).dataSync())
+}
+
+/**
+ * Normalizes the values of Tensor with a simple min-max normalization to values between 0 and 1.
+ * Is more like a rescaling rather than a standardization (i.e. z-transformation).
+ */
+export function normalizeMinMax(tensor: tf.Tensor<Rank>) {
+  return tf.div(
+    tf.sub(tensor, tf.min(tensor)),
+    tf.sub(tf.max(tensor), tf.min(tensor)),
+  )
+}
+
+
+const CATEGORY_COUNT: { [key: string]: any } = {
+  sold: 2
+};
+
+export function createDatasetsLinearRegression(data: { [key: string]: any }[], features: string[], label: string, testSize: number, categoricalFeatures?: Set<any>) {
+  const feturesValues: string | number[][] = data.map(row => features.flatMap(feature => {
+    if (categoricalFeatures?.has(feature)) {
+      return oneHot(!row[feature] ? 0 : row[feature], CATEGORY_COUNT[feature])
+    }
+    return !row[feature] ? 0 : row[feature];
+  }));
+
+  const feturesValuesTensors = normalizeMinMax(tf.tensor2d(feturesValues));
+  const labelValuesTensors = tf.tensor(data.map(row => !row[label] ? 0 : row[label]))
+
+  const splitIndex = Math.round(((1 - testSize) * data.length));
+
+  const [xTrain, xTest] = tf.split(feturesValuesTensors, [splitIndex, data.length - splitIndex]);
+  const [yTrain, yTest] = tf.split(labelValuesTensors, [splitIndex, data.length - splitIndex]);
+
+  return [xTrain, xTest, yTrain, yTest];
 }
 
 /**

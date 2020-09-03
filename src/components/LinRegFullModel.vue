@@ -16,25 +16,23 @@
     .viz(v-if="isTraining")
       h5 Loss
       .loss-cont(ref="lossCont")
+      .loss-cont(ref="accCont")
   .plot
     #my-lin-regfull-model
     span.correlation(v-show="correlationValue") Pairwise correlation between x and y: {{ correlationValue }} (n = {{ n }})
 </template>
 
 <script lang="ts">
-import {
-  defineComponent,
-  ref,
-  onMounted,
-  onBeforeUnmount,
-} from "vue";
+import { defineComponent, ref, onMounted, onBeforeUnmount } from "vue";
 import {
   getData,
   setUpD3Data,
   initScatter,
   plotData,
   printPrediction,
-  drawRegressionLine
+  drawRegressionLine,
+  loadCSVDataFromUrl,
+  createDatasetsLinearRegression,
 } from "../compositions/linearRegressionFullModel";
 import StatsLib from "@/statslib/index";
 import * as tf from "@tensorflow/tfjs";
@@ -49,10 +47,10 @@ export default defineComponent({
 
     // For TensorFlow
     let linearModel: tf.Sequential | null = null;
-    let xsTrain: tf.Tensor<tf.Rank> | null = null;
-    let ys: tf.Tensor<tf.Rank> | null = null;
-    const learningRate = 0.01;
-    const optimizer = tf.train.adam(learningRate);
+    const xsTrain: tf.Tensor<tf.Rank> | null = null;
+    const ys: tf.Tensor<tf.Rank> | null = null;
+    const learningRate = 0.001;
+    const optimizer = tf.train.sgd(learningRate);
     onMounted(async () => {
       initScatter("#my-lin-regfull-model");
       plotData();
@@ -73,9 +71,24 @@ export default defineComponent({
     const predictedValue = ref(0);
 
     // For TensorFlow
+    const data = await loadCSVDataFromUrl(
+      "http://localhost:8081/csv/unit-data-dummy.csv"
+    );
+
+    const features = [
+      "size",
+      // "rooms"
+    ];
+    const [xTrain, xTest, yTrain, yTest] = createDatasetsLinearRegression(
+      data,
+      features,
+      "price",
+      0.1
+      // new Set(["sold"])
+    );
     linearModel = tf.sequential();
-    xsTrain = tf.tensor(size, [size.length, 1]);
-    ys = tf.tensor(price, [price.length, 1]);
+    // xsTrain = tf.tensor(size, [size.length, 1]);
+    // ys = tf.tensor(price, [price.length, 1]);
 
     setUpD3Data(size, price);
     n.value = size.length;
@@ -85,13 +98,13 @@ export default defineComponent({
     linearModel.add(
       tf.layers.dense({
         units: 1,
-        inputShape: [1],
-        activation: "linear",
+        inputShape: [xTrain.shape[1]],
+        // activation: "sigmoid",
       })
     );
 
-    linearModel.add(tf.layers.dense({ units: 250, activation: "linear" }));
-    linearModel.add(tf.layers.dense({ units: 1, activation: "linear" }));
+    // linearModel.add(tf.layers.dense({ units: 250, activation: "linear" }));
+    // linearModel.add(tf.layers.dense({ units: 1, activation: "linear" }));
 
     linearModel.compile({
       optimizer,
@@ -100,34 +113,34 @@ export default defineComponent({
     });
 
     function linearPrediction(val: number): number {
-      const output = linearModel!.predict(
-        tf.tensor2d([val], [1, 1])
-      ) as tf.Tensor<tf.Rank>;
+      const output = linearModel!.predict(tf.tensor([val])) as tf.Tensor<
+        tf.Rank
+      >;
 
       const predictedValue = Array.from(output.dataSync())[0];
       output.dispose();
-      console.log(tf.memory().numTensors);
+      console.log("linearPrediction", tf.memory().numTensors);
       return predictedValue;
     }
 
-    async function fitModel(
-      xsTrain: tf.Tensor<tf.Rank>,
-      ys: tf.Tensor<tf.Rank>
-    ) {
+    async function fitModel(xs: tf.Tensor<tf.Rank>, ys: tf.Tensor<tf.Rank>) {
       const trainLogs: any[] = [];
-      await linearModel!.fit(xsTrain, ys, {
-        epochs: 100,
+      await linearModel!.fit(xs, ys, {
+        epochs: 400,
         shuffle: true,
-        batchSize: 32,
+        batchSize: 8,
         validationSplit: 0.1,
         callbacks: {
           onEpochEnd: async (epoch, logs) => {
             trainLogs.push({
               rmse: Math.sqrt(logs!.loss),
               "val_rmse": Math.sqrt(logs!.val_loss),
+              mae: logs!["meanAbsoluteError"],
+              "val_mae": logs!["val_meanAbsoluteError"],
             });
 
             tfvis.show.history(lossCont.value, trainLogs, ["rmse", "val_rmse"]);
+            tfvis.show.history(accCont.value, trainLogs, ["mae", "val_mae"]);
           },
         },
       });
@@ -135,6 +148,8 @@ export default defineComponent({
       tf.tidy(() => {
         const y1hat = linearPrediction(40);
         const y2hat = linearPrediction(170);
+        console.log(y1hat);
+        console.log(y2hat);
         drawRegressionLine(40, 170, y1hat, y2hat);
       });
     }
@@ -142,7 +157,8 @@ export default defineComponent({
     async function onFitModelClick() {
       isTraining.value = true;
       console.log(tf.memory().numTensors);
-      await fitModel(xsTrain!, ys!);
+      console.log(xTrain.shape);
+      await fitModel(xTrain, yTrain);
       modelTrained.value = true;
       console.log(tf.memory().numTensors);
     }
